@@ -1,5 +1,16 @@
 const canvas = document.querySelector("#marsCanvas");
 const ctx = canvas.getContext("2d");
+const companion = document.querySelector("[data-alien-companion]");
+const companionSprite = companion.querySelector(".alien-companion__sprite");
+
+const alienSprites = {
+  idle: "assets/alien.png",
+  curious: "assets/alien_curious.png",
+  happy: "assets/alien_happy.png",
+  thumbsup: "assets/alien_thumbsup.png",
+  fly: "assets/alien_fly.png",
+  walk: "assets/alien_walk.gif",
+};
 
 const marsState = {
   rotationX: -10,
@@ -203,6 +214,170 @@ function initBookingForm() {
   });
 }
 
+function initAlienCompanion() {
+  const state = {
+    dragging: false,
+    hovered: false,
+    pointerId: null,
+    offsetX: 0,
+    offsetY: 0,
+    lastX: 0,
+    lastY: 0,
+    x: companion.offsetLeft,
+    y: companion.offsetTop,
+    settleTimer: null,
+    thumbsupTimer: null,
+    walkFrame: null,
+    suppressNextClick: false,
+  };
+
+  Object.values(alienSprites).forEach((src) => {
+    const image = new Image();
+    image.src = src;
+  });
+
+  function setSprite(name) {
+    const nextSrc = alienSprites[name];
+    if (companionSprite.getAttribute("src") !== nextSrc) {
+      companionSprite.setAttribute("src", nextSrc);
+    }
+  }
+
+  function setFacing(deltaX) {
+    if (deltaX < -1) {
+      companion.style.setProperty("--alien-facing", "-1");
+    } else if (deltaX > 1) {
+      companion.style.setProperty("--alien-facing", "1");
+    }
+  }
+
+  function moveTo(x, y) {
+    const maxX = window.innerWidth - companion.offsetWidth;
+    const maxY = window.innerHeight - companion.offsetHeight;
+    state.x = clamp(x, 8, maxX - 8);
+    state.y = clamp(y, 76, maxY - 8);
+    companion.style.left = `${state.x}px`;
+    companion.style.top = `${state.y}px`;
+  }
+
+  function clearTimers() {
+    window.clearTimeout(state.settleTimer);
+    window.clearTimeout(state.thumbsupTimer);
+    window.cancelAnimationFrame(state.walkFrame);
+    state.walkFrame = null;
+  }
+
+  companion.addEventListener("pointerenter", () => {
+    state.hovered = true;
+    if (!state.dragging) setSprite("curious");
+  });
+
+  companion.addEventListener("pointerleave", () => {
+    state.hovered = false;
+    if (!state.dragging) setSprite("idle");
+  });
+
+  companion.addEventListener("pointerdown", (event) => {
+    clearTimers();
+    state.dragging = true;
+    state.pointerId = event.pointerId;
+    state.offsetX = event.clientX - state.x;
+    state.offsetY = event.clientY - state.y;
+    state.lastX = event.clientX;
+    state.lastY = event.clientY;
+    state.suppressNextClick = true;
+    companion.classList.add("is-dragging");
+    companion.setPointerCapture(event.pointerId);
+    setSprite("fly");
+  });
+
+  companion.addEventListener("pointermove", (event) => {
+    if (!state.dragging || event.pointerId !== state.pointerId) return;
+
+    const deltaX = event.clientX - state.lastX;
+    moveTo(event.clientX - state.offsetX, event.clientY - state.offsetY);
+    setFacing(deltaX);
+    state.lastX = event.clientX;
+    state.lastY = event.clientY;
+  });
+
+  function finishDrag(event) {
+    if (!state.dragging || event.pointerId !== state.pointerId) return;
+
+    state.dragging = false;
+    state.pointerId = null;
+    companion.classList.remove("is-dragging");
+    if (companion.hasPointerCapture(event.pointerId)) {
+      companion.releasePointerCapture(event.pointerId);
+    }
+
+    setSprite("walk");
+    state.settleTimer = window.setTimeout(() => {
+      setSprite(state.hovered ? "curious" : "idle");
+    }, 850);
+  }
+
+  companion.addEventListener("pointerup", finishDrag);
+  companion.addEventListener("pointercancel", finishDrag);
+  window.addEventListener("pointerup", finishDrag);
+  window.addEventListener("pointercancel", finishDrag);
+
+  companion.addEventListener("dblclick", () => {
+    clearTimers();
+    setSprite("happy");
+    state.thumbsupTimer = window.setTimeout(() => setSprite("thumbsup"), 780);
+    state.settleTimer = window.setTimeout(() => {
+      setSprite(state.hovered ? "curious" : "idle");
+    }, 1600);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (state.suppressNextClick) {
+      state.suppressNextClick = false;
+      return;
+    }
+
+    if (event.target.closest(".alien-companion, a, button, input, form")) {
+      return;
+    }
+
+    clearTimers();
+    const targetX = event.clientX - companion.offsetWidth / 2;
+    const targetY = event.clientY - companion.offsetHeight / 2;
+    const startX = state.x;
+    const startY = state.y;
+    const deltaX = targetX - startX;
+    const deltaY = targetY - startY;
+    const distance = Math.hypot(deltaX, deltaY);
+    const duration = clamp(distance * 6, 450, 1600);
+    const startTime = performance.now();
+
+    setFacing(deltaX);
+    setSprite("walk");
+
+    function step(now) {
+      const progress = clamp((now - startTime) / duration, 0, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      moveTo(startX + deltaX * eased, startY + deltaY * eased);
+
+      if (progress < 1) {
+        state.walkFrame = requestAnimationFrame(step);
+        return;
+      }
+
+      setSprite("thumbsup");
+      state.settleTimer = window.setTimeout(() => {
+        setSprite(state.hovered ? "curious" : "idle");
+      }, 900);
+    }
+
+    state.walkFrame = requestAnimationFrame(step);
+  });
+
+  window.addEventListener("resize", () => moveTo(state.x, state.y));
+  moveTo(state.x, state.y);
+}
+
 canvas.addEventListener("pointerdown", handlePointerDown);
 canvas.addEventListener("pointermove", handlePointerMove);
 canvas.addEventListener("pointerup", handlePointerUp);
@@ -212,3 +387,4 @@ renderMarsGlobe();
 initRevealEffects();
 initCabinSelection();
 initBookingForm();
+initAlienCompanion();
