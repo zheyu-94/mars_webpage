@@ -47,10 +47,10 @@ body::before {
 .alien-companion {
   position: fixed;
   z-index: 30;
-  left: min(72vw, calc(100vw - 120px));
-  top: min(66vh, calc(100vh - 140px));
-  width: 88px;
-  height: 88px;
+  left: min(72vw, calc(100vw - 168px));
+  top: min(66vh, calc(100vh - 188px));
+  width: 132px;
+  height: 132px;
   display: grid;
   place-items: center;
   touch-action: none;
@@ -62,9 +62,9 @@ body::before {
 .alien-companion::after {
   content: "";
   position: absolute;
-  width: 52px;
-  height: 12px;
-  bottom: 7px;
+  width: 78px;
+  height: 18px;
+  bottom: 10px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.28);
   filter: blur(4px);
@@ -78,8 +78,8 @@ body::before {
 .alien-companion__sprite {
   position: relative;
   z-index: 1;
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   object-fit: contain;
   image-rendering: pixelated;
   transform: translateY(var(--alien-lift, 0)) scaleX(var(--alien-facing, 1));
@@ -89,7 +89,7 @@ body::before {
 }
 
 .alien-companion.is-dragging .alien-companion__sprite {
-  --alien-lift: -10px;
+  --alien-lift: -15px;
 }
 
 a {
@@ -426,15 +426,15 @@ h3 {
 
 @media (max-width: 640px) {
   .alien-companion {
-    left: calc(100vw - 104px);
-    top: calc(100vh - 134px);
-    width: 76px;
-    height: 76px;
+    left: calc(100vw - 132px);
+    top: calc(100vh - 164px);
+    width: 114px;
+    height: 114px;
   }
 
   .alien-companion__sprite {
-    width: 70px;
-    height: 70px;
+    width: 105px;
+    height: 105px;
   }
 
   .site-header {

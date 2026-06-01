@@ -227,6 +227,7 @@ function initAlienCompanion() {
     y: companion.offsetTop,
     settleTimer: null,
     thumbsupTimer: null,
+    randomWalkTimer: null,
     walkFrame: null,
     suppressNextClick: false,
   };
@@ -267,6 +268,61 @@ function initAlienCompanion() {
     state.walkFrame = null;
   }
 
+  function settleAfterWalk(delay = 900) {
+    state.settleTimer = window.setTimeout(() => {
+      setSprite(state.hovered ? "curious" : "idle");
+    }, delay);
+  }
+
+  function scheduleRandomWalk() {
+    window.clearTimeout(state.randomWalkTimer);
+    state.randomWalkTimer = window.setTimeout(() => {
+      if (state.dragging || state.walkFrame) {
+        scheduleRandomWalk();
+        return;
+      }
+
+      const targetX = 16 + Math.random() * Math.max(1, window.innerWidth - companion.offsetWidth - 32);
+      const targetY = 92 + Math.random() * Math.max(1, window.innerHeight - companion.offsetHeight - 108);
+      walkTo(targetX, targetY, { celebrate: false, reschedule: true });
+    }, 2600 + Math.random() * 3600);
+  }
+
+  function walkTo(targetX, targetY, options = {}) {
+    const { celebrate = true, reschedule = false } = options;
+    window.cancelAnimationFrame(state.walkFrame);
+    window.clearTimeout(state.settleTimer);
+
+    const startX = state.x;
+    const startY = state.y;
+    const deltaX = targetX - startX;
+    const deltaY = targetY - startY;
+    const distance = Math.hypot(deltaX, deltaY);
+    const duration = clamp(distance * 6, 450, 1600);
+    const startTime = performance.now();
+
+    setFacing(deltaX);
+    setSprite("walk");
+
+    function step(now) {
+      const progress = clamp((now - startTime) / duration, 0, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      moveTo(startX + deltaX * eased, startY + deltaY * eased);
+
+      if (progress < 1) {
+        state.walkFrame = requestAnimationFrame(step);
+        return;
+      }
+
+      state.walkFrame = null;
+      setSprite(celebrate ? "thumbsup" : state.hovered ? "curious" : "idle");
+      settleAfterWalk(celebrate ? 900 : 1200);
+      if (reschedule) scheduleRandomWalk();
+    }
+
+    state.walkFrame = requestAnimationFrame(step);
+  }
+
   companion.addEventListener("pointerenter", () => {
     state.hovered = true;
     if (!state.dragging) setSprite("curious");
@@ -279,6 +335,7 @@ function initAlienCompanion() {
 
   companion.addEventListener("pointerdown", (event) => {
     clearTimers();
+    window.clearTimeout(state.randomWalkTimer);
     state.dragging = true;
     state.pointerId = event.pointerId;
     state.offsetX = event.clientX - state.x;
@@ -312,9 +369,8 @@ function initAlienCompanion() {
     }
 
     setSprite("walk");
-    state.settleTimer = window.setTimeout(() => {
-      setSprite(state.hovered ? "curious" : "idle");
-    }, 850);
+    settleAfterWalk(850);
+    scheduleRandomWalk();
   }
 
   companion.addEventListener("pointerup", finishDrag);
@@ -324,11 +380,11 @@ function initAlienCompanion() {
 
   companion.addEventListener("dblclick", () => {
     clearTimers();
+    window.clearTimeout(state.randomWalkTimer);
     setSprite("happy");
     state.thumbsupTimer = window.setTimeout(() => setSprite("thumbsup"), 780);
-    state.settleTimer = window.setTimeout(() => {
-      setSprite(state.hovered ? "curious" : "idle");
-    }, 1600);
+    settleAfterWalk(1600);
+    scheduleRandomWalk();
   });
 
   document.addEventListener("click", (event) => {
@@ -342,40 +398,16 @@ function initAlienCompanion() {
     }
 
     clearTimers();
+    window.clearTimeout(state.randomWalkTimer);
     const targetX = event.clientX - companion.offsetWidth / 2;
     const targetY = event.clientY - companion.offsetHeight / 2;
-    const startX = state.x;
-    const startY = state.y;
-    const deltaX = targetX - startX;
-    const deltaY = targetY - startY;
-    const distance = Math.hypot(deltaX, deltaY);
-    const duration = clamp(distance * 6, 450, 1600);
-    const startTime = performance.now();
-
-    setFacing(deltaX);
-    setSprite("walk");
-
-    function step(now) {
-      const progress = clamp((now - startTime) / duration, 0, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      moveTo(startX + deltaX * eased, startY + deltaY * eased);
-
-      if (progress < 1) {
-        state.walkFrame = requestAnimationFrame(step);
-        return;
-      }
-
-      setSprite("thumbsup");
-      state.settleTimer = window.setTimeout(() => {
-        setSprite(state.hovered ? "curious" : "idle");
-      }, 900);
-    }
-
-    state.walkFrame = requestAnimationFrame(step);
+    walkTo(targetX, targetY);
+    scheduleRandomWalk();
   });
 
   window.addEventListener("resize", () => moveTo(state.x, state.y));
   moveTo(state.x, state.y);
+  scheduleRandomWalk();
 }
 
 canvas.addEventListener("pointerdown", handlePointerDown);
