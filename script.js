@@ -43,7 +43,7 @@ const particleState = {
   height: 0,
   dpr: 1,
   particles: [],
-  fallAngle: toRad(75),
+  fallAngle: toRad(105),
 };
 
 function resizeParticleCanvas() {
@@ -91,7 +91,7 @@ function renderParticles() {
     particle.x += dx * particle.speed;
     particle.y += dy * particle.speed;
 
-    if (particle.y > particleState.height + 80 || particle.x > particleState.width + 120) {
+    if (particle.y > particleState.height + 80 || particle.x < -120) {
       resetParticle(particle);
     }
 
@@ -266,10 +266,10 @@ function initCabinSelection() {
     card.querySelector("button").addEventListener("click", () => {
       cards.forEach((item) => {
         item.classList.remove("is-active");
-        item.querySelector("button").textContent = "Select";
+        item.querySelector("button").textContent = "選擇";
       });
       card.classList.add("is-active");
-      card.querySelector("button").textContent = "Selected";
+      card.querySelector("button").textContent = "已選擇";
     });
   });
 }
@@ -281,7 +281,7 @@ function initBookingForm() {
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const email = new FormData(form).get("email");
-    note.textContent = `${email} has been added to the launch manifest.`;
+    note.textContent = `${email} 已加入發射名單。`;
     form.reset();
   });
 }
@@ -370,7 +370,7 @@ function initAlienCompanion() {
     const deltaX = targetX - startX;
     const deltaY = targetY - startY;
     const distance = Math.hypot(deltaX, deltaY);
-    const duration = clamp(distance * 14, 1200, 4200);
+    const duration = clamp(distance * 6, 450, 1600);
     const startTime = performance.now();
 
     setFacing(deltaX);
