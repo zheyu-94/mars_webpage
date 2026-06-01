@@ -1,5 +1,7 @@
 const canvas = document.querySelector("#marsCanvas");
 const ctx = canvas.getContext("2d");
+const particleCanvas = document.querySelector("#particleCanvas");
+const particleCtx = particleCanvas.getContext("2d");
 const companion = document.querySelector("[data-alien-companion]");
 const companionSprite = companion.querySelector(".alien-companion__sprite");
 
@@ -35,6 +37,76 @@ const marsState = {
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const toRad = (degrees) => (degrees * Math.PI) / 180;
+
+const particleState = {
+  width: 0,
+  height: 0,
+  dpr: 1,
+  particles: [],
+  fallAngle: toRad(75),
+};
+
+function resizeParticleCanvas() {
+  particleState.dpr = Math.min(window.devicePixelRatio || 1, 2);
+  particleState.width = window.innerWidth;
+  particleState.height = window.innerHeight;
+  particleCanvas.width = Math.floor(particleState.width * particleState.dpr);
+  particleCanvas.height = Math.floor(particleState.height * particleState.dpr);
+  particleCanvas.style.width = `${particleState.width}px`;
+  particleCanvas.style.height = `${particleState.height}px`;
+  particleCtx.setTransform(particleState.dpr, 0, 0, particleState.dpr, 0, 0);
+
+  const count = Math.floor(clamp((particleState.width * particleState.height) / 15000, 42, 110));
+  particleState.particles = Array.from({ length: count }, createParticle);
+}
+
+function createParticle() {
+  return {
+    x: Math.random() * (particleState.width + 180) - 90,
+    y: Math.random() * (particleState.height + 180) - 90,
+    length: 10 + Math.random() * 26,
+    speed: 0.45 + Math.random() * 1.1,
+    alpha: 0.18 + Math.random() * 0.42,
+    width: 0.7 + Math.random() * 1.4,
+  };
+}
+
+function resetParticle(particle) {
+  particle.x = Math.random() * (particleState.width + 220) - 160;
+  particle.y = -40 - Math.random() * 180;
+  particle.length = 10 + Math.random() * 26;
+  particle.speed = 0.45 + Math.random() * 1.1;
+  particle.alpha = 0.18 + Math.random() * 0.42;
+  particle.width = 0.7 + Math.random() * 1.4;
+}
+
+function renderParticles() {
+  const dx = Math.cos(particleState.fallAngle);
+  const dy = Math.sin(particleState.fallAngle);
+
+  particleCtx.clearRect(0, 0, particleState.width, particleState.height);
+  particleCtx.lineCap = "round";
+
+  particleState.particles.forEach((particle) => {
+    particle.x += dx * particle.speed;
+    particle.y += dy * particle.speed;
+
+    if (particle.y > particleState.height + 80 || particle.x > particleState.width + 120) {
+      resetParticle(particle);
+    }
+
+    particleCtx.globalAlpha = particle.alpha;
+    particleCtx.lineWidth = particle.width;
+    particleCtx.strokeStyle = "#eef7ff";
+    particleCtx.beginPath();
+    particleCtx.moveTo(particle.x, particle.y);
+    particleCtx.lineTo(particle.x - dx * particle.length, particle.y - dy * particle.length);
+    particleCtx.stroke();
+  });
+
+  particleCtx.globalAlpha = 1;
+  requestAnimationFrame(renderParticles);
+}
 
 function projectPoint(latitude, longitude, radius) {
   const lat = toRad(latitude + marsState.rotationX);
@@ -298,7 +370,7 @@ function initAlienCompanion() {
     const deltaX = targetX - startX;
     const deltaY = targetY - startY;
     const distance = Math.hypot(deltaX, deltaY);
-    const duration = clamp(distance * 6, 450, 1600);
+    const duration = clamp(distance * 14, 1200, 4200);
     const startTime = performance.now();
 
     setFacing(deltaX);
@@ -414,7 +486,10 @@ canvas.addEventListener("pointerdown", handlePointerDown);
 canvas.addEventListener("pointermove", handlePointerMove);
 canvas.addEventListener("pointerup", handlePointerUp);
 canvas.addEventListener("pointercancel", handlePointerUp);
+window.addEventListener("resize", resizeParticleCanvas);
 
+resizeParticleCanvas();
+renderParticles();
 renderMarsGlobe();
 initRevealEffects();
 initCabinSelection();
