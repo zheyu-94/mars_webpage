@@ -581,6 +581,9 @@ function initAlienCompanion() {
     thumbsupTimer: null,
     randomWalkTimer: null,
     walkFrame: null,
+    keyboardFrame: null,
+    keyboardLastTime: 0,
+    keys: new Set(),
     suppressNextClick: false,
     bubbleTimer: null,
   };
@@ -614,11 +617,25 @@ function initAlienCompanion() {
     companion.style.top = `${state.y}px`;
   }
 
+  function isTypingTarget(target) {
+    if (!(target instanceof Element)) return false;
+    return target.closest("input, textarea, select, [contenteditable='true']");
+  }
+
   function clearTimers() {
     window.clearTimeout(state.settleTimer);
     window.clearTimeout(state.thumbsupTimer);
     window.cancelAnimationFrame(state.walkFrame);
     state.walkFrame = null;
+  }
+
+  function stopKeyboardControl() {
+    window.cancelAnimationFrame(state.keyboardFrame);
+    state.keyboardFrame = null;
+    state.keyboardLastTime = 0;
+    state.keys.clear();
+    setSprite(state.hovered ? "curious" : "idle");
+    scheduleRandomWalk();
   }
 
   function showMessage(message, duration = 2600) {
@@ -703,6 +720,44 @@ function initAlienCompanion() {
     state.walkFrame = requestAnimationFrame(step);
   }
 
+  function updateKeyboardControl(now) {
+    if (!state.keys.size) {
+      stopKeyboardControl();
+      return;
+    }
+
+    const elapsed = state.keyboardLastTime ? now - state.keyboardLastTime : 16;
+    const speed = 0.16;
+    let deltaX = 0;
+    let deltaY = 0;
+
+    if (state.keys.has("a")) deltaX -= 1;
+    if (state.keys.has("d")) deltaX += 1;
+    if (state.keys.has("w")) deltaY -= 1;
+    if (state.keys.has("s")) deltaY += 1;
+
+    if (deltaX || deltaY) {
+      const length = Math.hypot(deltaX, deltaY);
+      const step = clamp(elapsed, 0, 32) * speed;
+      const nextX = (deltaX / length) * step;
+      const nextY = (deltaY / length) * step;
+      setFacing(nextX);
+      setSprite("walk");
+      moveTo(state.x + nextX, state.y + nextY);
+    }
+
+    state.keyboardLastTime = now;
+    state.keyboardFrame = requestAnimationFrame(updateKeyboardControl);
+  }
+
+  function startKeyboardControl() {
+    if (state.keyboardFrame) return;
+    clearTimers();
+    window.clearTimeout(state.randomWalkTimer);
+    state.keyboardLastTime = 0;
+    state.keyboardFrame = requestAnimationFrame(updateKeyboardControl);
+  }
+
   companion.addEventListener("pointerenter", () => {
     state.hovered = true;
     if (!state.dragging) setSprite("curious");
@@ -716,6 +771,9 @@ function initAlienCompanion() {
   companion.addEventListener("pointerdown", (event) => {
     clearTimers();
     window.clearTimeout(state.randomWalkTimer);
+    window.cancelAnimationFrame(state.keyboardFrame);
+    state.keyboardFrame = null;
+    state.keys.clear();
     state.dragging = true;
     state.pointerId = event.pointerId;
     state.offsetX = event.clientX - state.x;
@@ -757,6 +815,26 @@ function initAlienCompanion() {
   companion.addEventListener("pointercancel", finishDrag);
   window.addEventListener("pointerup", finishDrag);
   window.addEventListener("pointercancel", finishDrag);
+
+  window.addEventListener("keydown", (event) => {
+    const key = event.key.toLowerCase();
+    if (!["w", "a", "s", "d"].includes(key) || isTypingTarget(event.target)) return;
+
+    event.preventDefault();
+    state.keys.add(key);
+    startKeyboardControl();
+  });
+
+  window.addEventListener("keyup", (event) => {
+    const key = event.key.toLowerCase();
+    if (!state.keys.has(key)) return;
+
+    event.preventDefault();
+    state.keys.delete(key);
+    if (!state.keys.size) {
+      stopKeyboardControl();
+    }
+  });
 
   companion.addEventListener("dblclick", () => {
     clearTimers();
