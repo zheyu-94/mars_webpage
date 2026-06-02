@@ -29,39 +29,39 @@ const alienApi = {
 
 const missionPhases = {
   briefing: {
-    title: "Orbital Briefing",
-    window: "Launch Prep",
-    copy: "Confirm cabin assignment, suit profile, launch window, and surface destination before boarding.",
-    focus: "Cabin lock-in",
-    duration: "48 hours",
-    mode: "Briefing support",
+    title: "軌道簡報",
+    window: "發射準備",
+    copy: "登船前確認艙等、太空衣設定、發射窗口與地表目的地。",
+    focus: "艙等鎖定",
+    duration: "48 小時",
+    mode: "簡報支援",
     reaction: "thumbsup",
   },
   burn: {
-    title: "Transfer Burn",
-    window: "Earth Departure",
-    copy: "Depart low Earth orbit, align with the Mars transfer path, and commit to the interplanetary burn.",
-    focus: "Trajectory commit",
-    duration: "36 minutes",
-    mode: "Flight watch",
+    title: "轉移點火",
+    window: "地球出發",
+    copy: "離開低地球軌道，對準火星轉移路徑，完成星際航行點火。",
+    focus: "軌道確認",
+    duration: "36 分鐘",
+    mode: "飛行監看",
     reaction: "fly",
   },
   cruise: {
-    title: "Deep Space Cruise",
-    window: "Transit",
-    copy: "Settle into habitat routines, navigation updates, cabin events, and long-range surface briefings.",
-    focus: "Life onboard",
-    duration: "180 days",
-    mode: "Daily guide",
+    title: "深空巡航",
+    window: "航行中",
+    copy: "進入棲地日程、導航更新、艙內活動，以及長距離地表簡報。",
+    focus: "艙內生活",
+    duration: "180 天",
+    mode: "每日導覽",
     reaction: "curious",
   },
   arrival: {
-    title: "Mars Arrival",
-    window: "Orbit + Landing",
-    copy: "Aerobrake into Mars orbit, confirm landing-site weather, and transfer to the descent vehicle.",
-    focus: "Surface entry",
-    duration: "2 sols",
-    mode: "Landing assist",
+    title: "火星抵達",
+    window: "入軌與登陸",
+    copy: "透過氣動煞車進入火星軌道，確認登陸地天候，轉乘下降載具。",
+    focus: "地表進入",
+    duration: "2 個火星日",
+    mode: "登陸協助",
     reaction: "happy",
   },
 };
@@ -91,19 +91,22 @@ const marsState = {
       name: "Olympus Mons",
       latitude: 32,
       longitude: -12,
-      description: "The tallest volcano in the solar system, staged for orbital flyovers and sunrise photography.",
+      label: "奧林帕斯山",
+      description: "太陽系最高火山，適合軌道飛越觀景與日出攝影。",
     },
     {
       name: "Valles Marineris",
       latitude: -8,
       longitude: 18,
-      description: "A canyon system built for low-gravity ridge walks and glass-roofed rover crossings.",
+      label: "水手號峽谷",
+      description: "壯闊峽谷系統，規劃低重力稜線步行與玻璃車頂漫遊車路線。",
     },
     {
       name: "Gale Crater",
       latitude: -24,
       longitude: 44,
-      description: "A research stop with layered terrain, rover history, and compact habitat domes.",
+      label: "蓋爾撞擊坑",
+      description: "具有層狀地形與探測車歷史的研究站，配置小型棲地圓頂。",
     },
   ],
 };
@@ -334,7 +337,7 @@ function setHotspotCard(hotspot) {
     return;
   }
 
-  hotspotTitle.textContent = hotspot.name;
+  hotspotTitle.textContent = hotspot.label || hotspot.name;
   hotspotCopy.textContent = hotspot.description;
   hotspotCard.classList.add("is-visible");
 }
@@ -402,7 +405,7 @@ function handleMarsHotspotClick(event) {
 
   marsState.activeHotspot = hotspot;
   setHotspotCard(hotspot);
-  alienApi.showMessage(`${hotspot.name} marked as a surface highlight.`);
+  alienApi.showMessage(`已標記 ${hotspot.label || hotspot.name} 為地表亮點。`);
 }
 
 function animateCounter(element) {
@@ -449,12 +452,13 @@ function initCabinSelection() {
     card.querySelector("button").addEventListener("click", () => {
       cards.forEach((item) => {
         item.classList.remove("is-active");
-        item.querySelector("button").textContent = "Select";
+        item.querySelector("button").textContent = "選擇";
       });
       card.classList.add("is-active");
-      card.querySelector("button").textContent = "Selected";
+      card.querySelector("button").textContent = "已選擇";
       form.dataset.selectedCabin = card.dataset.cabin;
-      alienApi.react(card.dataset.reaction, `${card.dataset.cabin} cabin selected.`);
+      form.dataset.selectedCabinLabel = card.dataset.cabinLabel;
+      alienApi.react(card.dataset.reaction, `已選擇${card.dataset.cabinLabel}艙等。`);
     });
   });
 }
@@ -500,15 +504,16 @@ function initBookingForm() {
     event.preventDefault();
     const email = new FormData(form).get("email");
     const cabin = form.dataset.selectedCabin || "Explorer";
-    const launchWindow = cabin === "Pioneer" ? "September 2035" : cabin === "Navigator" ? "August 2035" : "July 2035";
+    const cabinLabel = form.dataset.selectedCabinLabel || "探索者";
+    const launchWindow = cabin === "Pioneer" ? "2035 年 9 月" : cabin === "Navigator" ? "2035 年 8 月" : "2035 年 7 月";
     const seatCode = `MS-2035-${cabin.slice(0, 3).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
-    note.textContent = `${email} has been added to the ${cabin} launch manifest.`;
+    note.textContent = `${email} 已加入${cabinLabel}發射名單。`;
     passTraveler.textContent = email;
-    passCabin.textContent = cabin;
+    passCabin.textContent = cabinLabel;
     passWindow.textContent = launchWindow;
     passSeat.textContent = seatCode;
     boardingPass.hidden = false;
-    alienApi.react("thumbsup", `${cabin} boarding request received.`);
+    alienApi.react("thumbsup", `已收到${cabinLabel}登船申請。`);
     alienApi.cancelRandomWalk();
     alienApi.parkBottomRight();
     form.reset();
@@ -517,10 +522,10 @@ function initBookingForm() {
 
 function initSectionGuide() {
   const messages = {
-    hero: "Start here: drag Mars to inspect the route.",
-    dashboard: "Your mission sequence starts here. Pick a phase to inspect the journey.",
-    cabins: "Pick a cabin and I will lock it into your manifest.",
-    booking: "Send your email when you are ready to board.",
+    hero: "從這裡開始：拖曳火星查看航線。",
+    dashboard: "任務流程從這裡開始。選一個階段查看旅程細節。",
+    cabins: "選擇艙等後，我會把它鎖定到你的名單中。",
+    booking: "準備登船時，留下你的電子郵件。",
   };
 
   const observer = new IntersectionObserver(
@@ -548,16 +553,16 @@ function initMotionToggle() {
   motionToggle.addEventListener("click", () => {
     motionState.enabled = !motionState.enabled;
     motionToggle.setAttribute("aria-pressed", String(motionState.enabled));
-    motionToggle.textContent = motionState.enabled ? "Motion On" : "Motion Off";
+    motionToggle.textContent = motionState.enabled ? "動態開啟" : "動態關閉";
 
     if (motionState.enabled) {
       alienApi.scheduleRandomWalk();
-      alienApi.showMessage("Autopilot motion is back online.");
+      alienApi.showMessage("自動動態已恢復。");
       return;
     }
 
     alienApi.cancelRandomWalk();
-    alienApi.showMessage("Motion paused. Manual controls still work.");
+    alienApi.showMessage("動態已暫停，手動操作仍可使用。");
   });
 }
 
@@ -787,7 +792,7 @@ function initAlienCompanion() {
   alienApi.scheduleRandomWalk = scheduleRandomWalk;
   alienApi.cancelRandomWalk = () => window.clearTimeout(state.randomWalkTimer);
   alienApi.parkBottomRight = parkBottomRight;
-  showMessage("I can guide you through the mission.");
+  showMessage("我可以帶你完成整趟任務。");
   scheduleRandomWalk();
 }
 
