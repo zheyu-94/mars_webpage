@@ -380,14 +380,15 @@ h3 {
   margin-bottom: 34px;
 }
 
-.metric-grid,
+.mission-planner,
 .cabin-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(260px, 0.86fr) minmax(0, 1.14fr);
   gap: 16px;
 }
 
-.metric-card,
+.mission-timeline,
+.mission-phase,
 .cabin-card,
 .booking__inner {
   border: 1px solid var(--line);
@@ -396,12 +397,46 @@ h3 {
   box-shadow: var(--shadow);
 }
 
-.metric-card {
-  min-height: 220px;
-  padding: 24px;
+.mission-timeline {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
 }
 
-.metric-card__label,
+.mission-step {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  min-height: 66px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 0 14px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+  font-weight: 800;
+  text-align: left;
+}
+
+.mission-step span {
+  color: var(--aurora);
+  font-family: "Space Grotesk", Inter, sans-serif;
+}
+
+.mission-step:hover,
+.mission-step.is-active {
+  border-color: rgba(0, 255, 204, 0.38);
+  color: var(--ice);
+  background: rgba(0, 255, 204, 0.08);
+}
+
+.mission-phase {
+  min-height: 326px;
+  padding: clamp(24px, 4vw, 42px);
+}
+
+.mission-phase__label,
 .cabin-card__tier {
   display: block;
   margin-bottom: 22px;
@@ -410,18 +445,36 @@ h3 {
   font-weight: 700;
 }
 
-.metric-card strong {
-  display: block;
+.mission-phase h3 {
   margin-bottom: 16px;
-  color: var(--solar);
-  font-family: "Space Grotesk", Inter, sans-serif;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1;
 }
 
-.metric-card p,
+.mission-phase p,
 .cabin-card p {
   color: var(--muted);
   line-height: 1.6;
+}
+
+.mission-phase dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 28px 0 0;
+}
+
+.mission-phase dt {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.mission-phase dd {
+  margin: 0;
+  color: var(--solar);
+  font-weight: 800;
 }
 
 .cabin-grid {
@@ -558,10 +611,14 @@ h3 {
     padding-top: 118px;
   }
 
-  .metric-grid,
+  .mission-planner,
   .cabin-grid,
   .boarding-pass__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mission-phase dl {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -607,7 +664,7 @@ h3 {
     padding-right: 18px;
   }
 
-  .metric-grid,
+  .mission-planner,
   .cabin-grid,
   .boarding-pass__grid {
     grid-template-columns: 1fr;

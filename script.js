@@ -27,6 +27,45 @@ const alienApi = {
   parkBottomRight: () => {},
 };
 
+const missionPhases = {
+  briefing: {
+    title: "Orbital Briefing",
+    window: "Launch Prep",
+    copy: "Confirm cabin assignment, suit profile, launch window, and surface destination before boarding.",
+    focus: "Cabin lock-in",
+    duration: "48 hours",
+    mode: "Briefing support",
+    reaction: "thumbsup",
+  },
+  burn: {
+    title: "Transfer Burn",
+    window: "Earth Departure",
+    copy: "Depart low Earth orbit, align with the Mars transfer path, and commit to the interplanetary burn.",
+    focus: "Trajectory commit",
+    duration: "36 minutes",
+    mode: "Flight watch",
+    reaction: "fly",
+  },
+  cruise: {
+    title: "Deep Space Cruise",
+    window: "Transit",
+    copy: "Settle into habitat routines, navigation updates, cabin events, and long-range surface briefings.",
+    focus: "Life onboard",
+    duration: "180 days",
+    mode: "Daily guide",
+    reaction: "curious",
+  },
+  arrival: {
+    title: "Mars Arrival",
+    window: "Orbit + Landing",
+    copy: "Aerobrake into Mars orbit, confirm landing-site weather, and transfer to the descent vehicle.",
+    focus: "Surface entry",
+    duration: "2 sols",
+    mode: "Landing assist",
+    reaction: "happy",
+  },
+};
+
 const alienSprites = {
   idle: "assets/alien.png",
   curious: "assets/alien_curious.png",
@@ -420,6 +459,39 @@ function initCabinSelection() {
   });
 }
 
+function initMissionPlanner() {
+  const steps = [...document.querySelectorAll("[data-phase]")];
+  const title = document.querySelector("[data-phase-title]");
+  const windowLabel = document.querySelector("[data-phase-window]");
+  const copy = document.querySelector("[data-phase-copy]");
+  const focus = document.querySelector("[data-phase-focus]");
+  const duration = document.querySelector("[data-phase-duration]");
+  const mode = document.querySelector("[data-phase-mode]");
+
+  function setPhase(phaseKey) {
+    const phase = missionPhases[phaseKey];
+    if (!phase) return;
+
+    steps.forEach((step) => {
+      const active = step.dataset.phase === phaseKey;
+      step.classList.toggle("is-active", active);
+      step.setAttribute("aria-selected", String(active));
+    });
+
+    title.textContent = phase.title;
+    windowLabel.textContent = phase.window;
+    copy.textContent = phase.copy;
+    focus.textContent = phase.focus;
+    duration.textContent = phase.duration;
+    mode.textContent = phase.mode;
+    alienApi.react(phase.reaction, `${phase.title}: ${phase.focus}.`);
+  }
+
+  steps.forEach((step) => {
+    step.addEventListener("click", () => setPhase(step.dataset.phase));
+  });
+}
+
 function initBookingForm() {
   const form = document.querySelector(".booking-form");
   const note = document.querySelector(".form-note");
@@ -446,7 +518,7 @@ function initBookingForm() {
 function initSectionGuide() {
   const messages = {
     hero: "Start here: drag Mars to inspect the route.",
-    dashboard: "These mission numbers define your Mars transfer window.",
+    dashboard: "Your mission sequence starts here. Pick a phase to inspect the journey.",
     cabins: "Pick a cabin and I will lock it into your manifest.",
     booking: "Send your email when you are ready to board.",
   };
@@ -458,6 +530,11 @@ function initSectionGuide() {
         .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
       if (activeEntry) {
+        if (activeEntry.target.id === "dashboard") {
+          alienApi.cancelRandomWalk();
+          alienApi.parkBottomRight();
+        }
+
         alienApi.showMessage(messages[activeEntry.target.id]);
       }
     },
@@ -732,6 +809,7 @@ renderParticles();
 renderMarsGlobe();
 initRevealEffects();
 initCabinSelection();
+initMissionPlanner();
 initBookingForm();
 initAlienCompanion();
 initSectionGuide();

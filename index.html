@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     >
-    <link rel="stylesheet" href="styles.css?v=even-craters">
+    <link rel="stylesheet" href="styles.css?v=mission-planner">
   </head>
   <body>
     <canvas id="particleCanvas" aria-hidden="true"></canvas>
@@ -32,7 +32,7 @@
     <header class="site-header" aria-label="Primary">
       <a class="brand" href="#hero" aria-label="MARS 2035 home">MARS 2035</a>
       <nav class="nav-links" aria-label="Page sections">
-        <a href="#dashboard">Data</a>
+        <a href="#dashboard">Timeline</a>
         <a href="#cabins">Cabins</a>
         <a href="#booking">Book</a>
       </nav>
@@ -68,29 +68,54 @@
 
       <section class="section dashboard" id="dashboard">
         <div class="section__intro reveal">
-          <p class="eyebrow">MISSION DATA</p>
-          <h2>Designed for a new planetary commute.</h2>
+          <p class="eyebrow">MISSION PLANNER</p>
+          <h2>Your launch sequence, from Earth orbit to Mars arrival.</h2>
         </div>
-        <div class="metric-grid">
-          <article class="metric-card reveal">
-            <span class="metric-card__label">Surface Gravity</span>
-            <strong><span data-counter="0.38" data-decimals="2">0</span>G</strong>
-            <p>Lower impact exploration support for extended surface walks.</p>
-          </article>
-          <article class="metric-card reveal">
-            <span class="metric-card__label">Distance Window</span>
-            <strong><span data-counter="5460">0</span>M km</strong>
-            <p>Departure aligned with the 2035 orbital transfer corridor.</p>
-          </article>
-          <article class="metric-card reveal">
-            <span class="metric-card__label">Atmosphere CO2</span>
-            <strong><span data-counter="95">0</span>%</strong>
-            <p>Suit systems tuned for thin-air excursions and sealed habitats.</p>
-          </article>
-          <article class="metric-card reveal">
-            <span class="metric-card__label">Transit Duration</span>
-            <strong><span data-counter="180">0</span> days</strong>
-            <p>Balanced trajectory for comfort, fuel economy, and arrival timing.</p>
+        <div class="mission-planner reveal">
+          <div class="mission-timeline" role="tablist" aria-label="Mars journey phases">
+            <button
+              class="mission-step is-active"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              data-phase="briefing"
+            >
+              <span>01</span>
+              Orbital Briefing
+            </button>
+            <button class="mission-step" type="button" role="tab" aria-selected="false" data-phase="burn">
+              <span>02</span>
+              Transfer Burn
+            </button>
+            <button class="mission-step" type="button" role="tab" aria-selected="false" data-phase="cruise">
+              <span>03</span>
+              Deep Space Cruise
+            </button>
+            <button class="mission-step" type="button" role="tab" aria-selected="false" data-phase="arrival">
+              <span>04</span>
+              Mars Arrival
+            </button>
+          </div>
+          <article class="mission-phase" data-mission-phase>
+            <span class="mission-phase__label" data-phase-window>Launch Prep</span>
+            <h3 data-phase-title>Orbital Briefing</h3>
+            <p data-phase-copy>
+              Confirm cabin assignment, suit profile, launch window, and surface destination before boarding.
+            </p>
+            <dl>
+              <div>
+                <dt>Focus</dt>
+                <dd data-phase-focus>Cabin lock-in</dd>
+              </div>
+              <div>
+                <dt>Duration</dt>
+                <dd data-phase-duration>48 hours</dd>
+              </div>
+              <div>
+                <dt>Companion Mode</dt>
+                <dd data-phase-mode>Briefing support</dd>
+              </div>
+            </dl>
           </article>
         </div>
       </section>
@@ -162,6 +187,6 @@
       </section>
     </main>
 
-    <script src="script.js?v=even-craters"></script>
+    <script src="script.js?v=mission-planner"></script>
   </body>
 </html>
