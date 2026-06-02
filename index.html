@@ -14,12 +14,13 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     >
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=companion-controls">
   </head>
   <body>
     <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
     <div class="alien-companion" data-alien-companion aria-label="Interactive alien companion">
+      <p class="alien-companion__bubble" data-alien-bubble aria-live="polite"></p>
       <img
         class="alien-companion__sprite"
         src="assets/alien.png"
@@ -35,6 +36,7 @@
         <a href="#cabins">Cabins</a>
         <a href="#booking">Book</a>
       </nav>
+      <button class="motion-toggle" type="button" data-motion-toggle aria-pressed="true">Motion On</button>
     </header>
 
     <main>
@@ -94,19 +96,19 @@
           <h2>Choose the way you cross deep space.</h2>
         </div>
         <div class="cabin-grid" role="list">
-          <article class="cabin-card reveal is-active" role="listitem">
+          <article class="cabin-card reveal is-active" role="listitem" data-cabin="Explorer" data-reaction="thumbsup">
             <span class="cabin-card__tier">Explorer</span>
             <h3>Observation Suite</h3>
             <p>Panoramic viewport, adaptive sleep cycle, and guided mission briefings.</p>
             <button class="cabin-card__button" type="button">Selected</button>
           </article>
-          <article class="cabin-card reveal" role="listitem">
+          <article class="cabin-card reveal" role="listitem" data-cabin="Navigator" data-reaction="happy">
             <span class="cabin-card__tier">Navigator</span>
             <h3>Command Loft</h3>
             <p>Expanded workspace, navigation simulations, and private comms lounge.</p>
             <button class="cabin-card__button" type="button">Select</button>
           </article>
-          <article class="cabin-card reveal" role="listitem">
+          <article class="cabin-card reveal" role="listitem" data-cabin="Pioneer" data-reaction="fly">
             <span class="cabin-card__tier">Pioneer</span>
             <h3>Habitat Studio</h3>
             <p>Surface-readiness training, hydroponic dining, and priority landing access.</p>
@@ -131,6 +133,6 @@
       </section>
     </main>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=companion-controls"></script>
   </body>
 </html>

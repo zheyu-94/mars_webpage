@@ -80,6 +80,34 @@ body::before {
   transform: scaleX(var(--shadow-scale, 1));
 }
 
+.alien-companion__bubble {
+  position: absolute;
+  right: 104px;
+  bottom: 88px;
+  z-index: 2;
+  width: max-content;
+  max-width: min(260px, calc(100vw - 40px));
+  min-height: 38px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 255, 204, 0.36);
+  border-radius: 8px;
+  color: var(--ice);
+  background: rgba(7, 7, 10, 0.82);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.34);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 180ms ease;
+  pointer-events: none;
+}
+
+.alien-companion__bubble.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .alien-companion.is-dragging {
   cursor: grabbing;
 }
@@ -147,6 +175,24 @@ h3 {
 
 .nav-links a:hover {
   color: var(--aurora);
+}
+
+.motion-toggle {
+  min-height: 36px;
+  border: 1px solid rgba(0, 255, 204, 0.32);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: var(--aurora);
+  background: rgba(0, 255, 204, 0.08);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.motion-toggle[aria-pressed="false"] {
+  border-color: var(--line);
+  color: var(--muted);
+  background: rgba(238, 247, 255, 0.06);
 }
 
 .hero {
@@ -441,6 +487,12 @@ h3 {
     height: 105px;
   }
 
+  .alien-companion__bubble {
+    right: 72px;
+    bottom: 74px;
+    max-width: min(220px, calc(100vw - 32px));
+  }
+
   .site-header {
     position: sticky;
     padding: 16px 20px;
@@ -449,6 +501,12 @@ h3 {
   .nav-links {
     gap: 12px;
     font-size: 0.84rem;
+  }
+
+  .motion-toggle {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 0.78rem;
   }
 
   .hero,

@@ -4,6 +4,19 @@ const particleCanvas = document.querySelector("#particleCanvas");
 const particleCtx = particleCanvas.getContext("2d");
 const companion = document.querySelector("[data-alien-companion]");
 const companionSprite = companion.querySelector(".alien-companion__sprite");
+const companionBubble = document.querySelector("[data-alien-bubble]");
+const motionToggle = document.querySelector("[data-motion-toggle]");
+
+const motionState = {
+  enabled: true,
+};
+
+const alienApi = {
+  showMessage: () => {},
+  react: () => {},
+  scheduleRandomWalk: () => {},
+  cancelRandomWalk: () => {},
+};
 
 const alienSprites = {
   idle: "assets/alien.png",
@@ -88,8 +101,10 @@ function renderParticles() {
   particleCtx.lineCap = "round";
 
   particleState.particles.forEach((particle) => {
-    particle.x += dx * particle.speed;
-    particle.y += dy * particle.speed;
+    if (motionState.enabled) {
+      particle.x += dx * particle.speed;
+      particle.y += dy * particle.speed;
+    }
 
     if (particle.y > particleState.height + 80 || particle.x < -120) {
       resetParticle(particle);
@@ -184,7 +199,7 @@ function renderMarsGlobe() {
   ctx.arc(center, center, radius, 0, Math.PI * 2);
   ctx.fill();
 
-  if (!marsState.dragging) {
+  if (motionState.enabled && !marsState.dragging) {
     marsState.rotationY += marsState.velocityX;
     marsState.rotationX = clamp(marsState.rotationX + marsState.velocityY, -78, 78);
     marsState.velocityX *= 0.992;
@@ -262,6 +277,7 @@ function initRevealEffects() {
 
 function initCabinSelection() {
   const cards = [...document.querySelectorAll(".cabin-card")];
+  const form = document.querySelector(".booking-form");
   cards.forEach((card) => {
     card.querySelector("button").addEventListener("click", () => {
       cards.forEach((item) => {
@@ -270,6 +286,8 @@ function initCabinSelection() {
       });
       card.classList.add("is-active");
       card.querySelector("button").textContent = "Selected";
+      form.dataset.selectedCabin = card.dataset.cabin;
+      alienApi.react(card.dataset.reaction, `${card.dataset.cabin} cabin selected.`);
     });
   });
 }
@@ -281,8 +299,51 @@ function initBookingForm() {
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const email = new FormData(form).get("email");
-    note.textContent = `${email} has been added to the launch manifest.`;
+    const cabin = form.dataset.selectedCabin || "Explorer";
+    note.textContent = `${email} has been added to the ${cabin} launch manifest.`;
+    alienApi.react("thumbsup", `${cabin} boarding request received.`);
     form.reset();
+  });
+}
+
+function initSectionGuide() {
+  const messages = {
+    hero: "Start here: drag Mars to inspect the route.",
+    dashboard: "These mission numbers define your Mars transfer window.",
+    cabins: "Pick a cabin and I will lock it into your manifest.",
+    booking: "Send your email when you are ready to board.",
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const activeEntry = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+      if (activeEntry) {
+        alienApi.showMessage(messages[activeEntry.target.id]);
+      }
+    },
+    { threshold: [0.35, 0.6] }
+  );
+
+  document.querySelectorAll("#hero, #dashboard, #cabins, #booking").forEach((section) => observer.observe(section));
+}
+
+function initMotionToggle() {
+  motionToggle.addEventListener("click", () => {
+    motionState.enabled = !motionState.enabled;
+    motionToggle.setAttribute("aria-pressed", String(motionState.enabled));
+    motionToggle.textContent = motionState.enabled ? "Motion On" : "Motion Off";
+
+    if (motionState.enabled) {
+      alienApi.scheduleRandomWalk();
+      alienApi.showMessage("Autopilot motion is back online.");
+      return;
+    }
+
+    alienApi.cancelRandomWalk();
+    alienApi.showMessage("Motion paused. Manual controls still work.");
   });
 }
 
@@ -302,6 +363,7 @@ function initAlienCompanion() {
     randomWalkTimer: null,
     walkFrame: null,
     suppressNextClick: false,
+    bubbleTimer: null,
   };
 
   Object.values(alienSprites).forEach((src) => {
@@ -340,6 +402,25 @@ function initAlienCompanion() {
     state.walkFrame = null;
   }
 
+  function showMessage(message, duration = 2600) {
+    if (!message) return;
+
+    window.clearTimeout(state.bubbleTimer);
+    companionBubble.textContent = message;
+    companionBubble.classList.add("is-visible");
+    state.bubbleTimer = window.setTimeout(() => {
+      companionBubble.classList.remove("is-visible");
+    }, duration);
+  }
+
+  function react(name, message) {
+    clearTimers();
+    setSprite(name);
+    showMessage(message);
+    settleAfterWalk(name === "fly" ? 1300 : 900);
+    scheduleRandomWalk();
+  }
+
   function settleAfterWalk(delay = 900) {
     state.settleTimer = window.setTimeout(() => {
       setSprite(state.hovered ? "curious" : "idle");
@@ -348,8 +429,10 @@ function initAlienCompanion() {
 
   function scheduleRandomWalk() {
     window.clearTimeout(state.randomWalkTimer);
+    if (!motionState.enabled) return;
+
     state.randomWalkTimer = window.setTimeout(() => {
-      if (state.dragging || state.walkFrame) {
+      if (!motionState.enabled || state.dragging || state.walkFrame) {
         scheduleRandomWalk();
         return;
       }
@@ -479,6 +562,11 @@ function initAlienCompanion() {
 
   window.addEventListener("resize", () => moveTo(state.x, state.y));
   moveTo(state.x, state.y);
+  alienApi.showMessage = showMessage;
+  alienApi.react = react;
+  alienApi.scheduleRandomWalk = scheduleRandomWalk;
+  alienApi.cancelRandomWalk = () => window.clearTimeout(state.randomWalkTimer);
+  showMessage("I can guide you through the mission.");
   scheduleRandomWalk();
 }
 
@@ -495,3 +583,5 @@ initRevealEffects();
 initCabinSelection();
 initBookingForm();
 initAlienCompanion();
+initSectionGuide();
+initMotionToggle();
