@@ -6,6 +6,14 @@ const companion = document.querySelector("[data-alien-companion]");
 const companionSprite = companion.querySelector(".alien-companion__sprite");
 const companionBubble = document.querySelector("[data-alien-bubble]");
 const motionToggle = document.querySelector("[data-motion-toggle]");
+const hotspotCard = document.querySelector("[data-mars-hotspot-card]");
+const hotspotTitle = document.querySelector("[data-mars-hotspot-title]");
+const hotspotCopy = document.querySelector("[data-mars-hotspot-copy]");
+const boardingPass = document.querySelector("[data-boarding-pass]");
+const passTraveler = document.querySelector("[data-pass-traveler]");
+const passCabin = document.querySelector("[data-pass-cabin]");
+const passWindow = document.querySelector("[data-pass-window]");
+const passSeat = document.querySelector("[data-pass-seat]");
 
 const motionState = {
   enabled: true,
@@ -16,6 +24,7 @@ const alienApi = {
   react: () => {},
   scheduleRandomWalk: () => {},
   cancelRandomWalk: () => {},
+  parkBottomRight: () => {},
 };
 
 const alienSprites = {
@@ -35,6 +44,8 @@ const marsState = {
   dragging: false,
   lastX: 0,
   lastY: 0,
+  activeHotspot: null,
+  hoveredHotspot: null,
   craterMap: [
     [-42, -14, 0.08],
     [-24, 22, 0.13],
@@ -46,7 +57,29 @@ const marsState = {
     [12, 44, 0.08],
     [-8, 2, 0.18],
   ],
+  hotspots: [
+    {
+      name: "Olympus Mons",
+      latitude: 32,
+      longitude: -12,
+      description: "The tallest volcano in the solar system, staged for orbital flyovers and sunrise photography.",
+    },
+    {
+      name: "Valles Marineris",
+      latitude: -8,
+      longitude: 18,
+      description: "A canyon system built for low-gravity ridge walks and glass-roofed rover crossings.",
+    },
+    {
+      name: "Gale Crater",
+      latitude: -24,
+      longitude: 44,
+      description: "A research stop with layered terrain, rover history, and compact habitat domes.",
+    },
+  ],
 };
+
+window.marsState = marsState;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const toRad = (degrees) => (degrees * Math.PI) / 180;
@@ -187,6 +220,42 @@ function renderMarsGlobe() {
   ctx.ellipse(center + radius * 0.08, center + radius * 0.12, radius * 0.9, radius * 0.2, toRad(-18 + marsState.rotationY * 0.12), 0, Math.PI * 2);
   ctx.stroke();
 
+  const visibleHotspots = [];
+
+  marsState.hotspots.forEach((hotspot) => {
+    const point = projectPoint(hotspot.latitude, hotspot.longitude, radius);
+    hotspot.screenX = center + point.x;
+    hotspot.screenY = center - point.y;
+    hotspot.visible = point.z > -radius * 0.2;
+
+    if (!hotspot.visible) return;
+
+    visibleHotspots.push({
+      name: hotspot.name,
+      x: Math.round(hotspot.screenX),
+      y: Math.round(hotspot.screenY),
+    });
+
+    const isActive = hotspot === marsState.activeHotspot || hotspot === marsState.hoveredHotspot;
+    const pulse = 1 + Math.sin(performance.now() / 220) * 0.14;
+    const markerRadius = (isActive ? 8 : 5.5) * pulse;
+
+    ctx.globalAlpha = isActive ? 0.95 : 0.72;
+    ctx.fillStyle = isActive ? "#00ffcc" : "#ffd166";
+    ctx.beginPath();
+    ctx.arc(hotspot.screenX, hotspot.screenY, markerRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha = isActive ? 0.32 : 0.2;
+    ctx.strokeStyle = isActive ? "#00ffcc" : "#ffd166";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(hotspot.screenX, hotspot.screenY, markerRadius + 9, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  canvas.dataset.visibleHotspots = JSON.stringify(visibleHotspots);
+
   ctx.restore();
   ctx.globalAlpha = 1;
 
@@ -209,6 +278,34 @@ function renderMarsGlobe() {
   }
 
   requestAnimationFrame(renderMarsGlobe);
+}
+
+function setHotspotCard(hotspot) {
+  if (!hotspot) {
+    hotspotCard.classList.remove("is-visible");
+    return;
+  }
+
+  hotspotTitle.textContent = hotspot.name;
+  hotspotCopy.textContent = hotspot.description;
+  hotspotCard.classList.add("is-visible");
+}
+
+function getCanvasPoint(event) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+    y: ((event.clientY - rect.top) / rect.height) * canvas.height,
+  };
+}
+
+function getHotspotAt(event) {
+  const point = getCanvasPoint(event);
+
+  return marsState.hotspots.find((hotspot) => {
+    if (!hotspot.visible) return false;
+    return Math.hypot(point.x - hotspot.screenX, point.y - hotspot.screenY) <= 24;
+  });
 }
 
 function handlePointerDown(event) {
@@ -236,6 +333,28 @@ function handlePointerUp(event) {
   if (canvas.hasPointerCapture(event.pointerId)) {
     canvas.releasePointerCapture(event.pointerId);
   }
+}
+
+function handleMarsHover(event) {
+  if (marsState.dragging) return;
+
+  marsState.hoveredHotspot = getHotspotAt(event) || null;
+  canvas.classList.toggle("has-hotspot", Boolean(marsState.hoveredHotspot));
+
+  if (marsState.hoveredHotspot) {
+    setHotspotCard(marsState.hoveredHotspot);
+  } else if (!marsState.activeHotspot) {
+    setHotspotCard(null);
+  }
+}
+
+function handleMarsHotspotClick(event) {
+  const hotspot = getHotspotAt(event);
+  if (!hotspot) return;
+
+  marsState.activeHotspot = hotspot;
+  setHotspotCard(hotspot);
+  alienApi.showMessage(`${hotspot.name} marked as a surface highlight.`);
 }
 
 function animateCounter(element) {
@@ -300,8 +419,17 @@ function initBookingForm() {
     event.preventDefault();
     const email = new FormData(form).get("email");
     const cabin = form.dataset.selectedCabin || "Explorer";
+    const launchWindow = cabin === "Pioneer" ? "September 2035" : cabin === "Navigator" ? "August 2035" : "July 2035";
+    const seatCode = `MS-2035-${cabin.slice(0, 3).toUpperCase()}-${Math.floor(100 + Math.random() * 900)}`;
     note.textContent = `${email} has been added to the ${cabin} launch manifest.`;
+    passTraveler.textContent = email;
+    passCabin.textContent = cabin;
+    passWindow.textContent = launchWindow;
+    passSeat.textContent = seatCode;
+    boardingPass.hidden = false;
     alienApi.react("thumbsup", `${cabin} boarding request received.`);
+    alienApi.cancelRandomWalk();
+    alienApi.parkBottomRight();
     form.reset();
   });
 }
@@ -419,6 +547,12 @@ function initAlienCompanion() {
     showMessage(message);
     settleAfterWalk(name === "fly" ? 1300 : 900);
     scheduleRandomWalk();
+  }
+
+  function parkBottomRight() {
+    clearTimers();
+    moveTo(window.innerWidth - companion.offsetWidth - 16, 82);
+    setFacing(1);
   }
 
   function settleAfterWalk(delay = 900) {
@@ -566,6 +700,7 @@ function initAlienCompanion() {
   alienApi.react = react;
   alienApi.scheduleRandomWalk = scheduleRandomWalk;
   alienApi.cancelRandomWalk = () => window.clearTimeout(state.randomWalkTimer);
+  alienApi.parkBottomRight = parkBottomRight;
   showMessage("I can guide you through the mission.");
   scheduleRandomWalk();
 }
@@ -574,6 +709,13 @@ canvas.addEventListener("pointerdown", handlePointerDown);
 canvas.addEventListener("pointermove", handlePointerMove);
 canvas.addEventListener("pointerup", handlePointerUp);
 canvas.addEventListener("pointercancel", handlePointerUp);
+canvas.addEventListener("pointermove", handleMarsHover);
+canvas.addEventListener("pointerleave", () => {
+  marsState.hoveredHotspot = null;
+  canvas.classList.remove("has-hotspot");
+  if (!marsState.activeHotspot) setHotspotCard(null);
+});
+canvas.addEventListener("click", handleMarsHotspotClick);
 window.addEventListener("resize", resizeParticleCanvas);
 
 resizeParticleCanvas();

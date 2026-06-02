@@ -301,6 +301,10 @@ h3 {
   filter: drop-shadow(0 0 44px rgba(226, 88, 62, 0.38));
 }
 
+#marsCanvas.has-hotspot {
+  cursor: pointer;
+}
+
 #marsCanvas:active {
   cursor: grabbing;
 }
@@ -319,6 +323,51 @@ h3 {
   width: 72%;
   border-color: rgba(255, 209, 102, 0.18);
   transform: rotateX(68deg) rotateZ(28deg);
+}
+
+.mars-hotspot-card {
+  position: absolute;
+  z-index: 4;
+  right: 2%;
+  bottom: 5%;
+  width: min(260px, 72vw);
+  border: 1px solid rgba(0, 255, 204, 0.26);
+  border-radius: 8px;
+  padding: 16px;
+  background: rgba(7, 7, 10, 0.78);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 180ms ease, transform 180ms ease;
+  pointer-events: none;
+}
+
+.mars-hotspot-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mars-hotspot-card__label,
+.boarding-pass__label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--aurora);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.mars-hotspot-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-family: "Space Grotesk", Inter, sans-serif;
+  font-size: 1.15rem;
+}
+
+.mars-hotspot-card p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .section {
@@ -450,6 +499,47 @@ h3 {
   color: var(--aurora);
 }
 
+.boarding-pass {
+  max-width: 760px;
+  margin-top: 26px;
+  border: 1px solid rgba(255, 209, 102, 0.42);
+  border-radius: 8px;
+  padding: 22px;
+  background:
+    linear-gradient(135deg, rgba(255, 209, 102, 0.12), rgba(226, 88, 62, 0.14)),
+    rgba(7, 7, 10, 0.68);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
+}
+
+.boarding-pass[hidden] {
+  display: none;
+}
+
+.boarding-pass h3 {
+  margin-bottom: 22px;
+}
+
+.boarding-pass__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin: 0;
+}
+
+.boarding-pass dt {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.boarding-pass dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ice);
+  font-weight: 800;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(22px);
@@ -469,7 +559,8 @@ h3 {
   }
 
   .metric-grid,
-  .cabin-grid {
+  .cabin-grid,
+  .boarding-pass__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -517,8 +608,13 @@ h3 {
   }
 
   .metric-grid,
-  .cabin-grid {
+  .cabin-grid,
+  .boarding-pass__grid {
     grid-template-columns: 1fr;
   }
 
+  .mars-hotspot-card {
+    right: 4%;
+    bottom: 4%;
+  }
 }

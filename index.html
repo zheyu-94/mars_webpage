@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
       rel="stylesheet"
     >
-    <link rel="stylesheet" href="styles.css?v=companion-controls">
+    <link rel="stylesheet" href="styles.css?v=hotspots-pass-v6">
   </head>
   <body>
     <canvas id="particleCanvas" aria-hidden="true"></canvas>
@@ -58,6 +58,11 @@
           <canvas id="marsCanvas" width="720" height="720"></canvas>
           <div class="orbit orbit--one"></div>
           <div class="orbit orbit--two"></div>
+          <aside class="mars-hotspot-card" data-mars-hotspot-card aria-live="polite">
+            <span class="mars-hotspot-card__label">Landing Site</span>
+            <strong data-mars-hotspot-title>Olympus Mons</strong>
+            <p data-mars-hotspot-copy>Hover or tap a glowing marker on Mars to inspect a destination.</p>
+          </aside>
         </div>
       </section>
 
@@ -129,10 +134,34 @@
             </div>
             <p class="form-note" aria-live="polite"></p>
           </form>
+          <article class="boarding-pass" data-boarding-pass hidden>
+            <div>
+              <span class="boarding-pass__label">BOARDING PASS</span>
+              <h3>MARS 2035</h3>
+            </div>
+            <dl class="boarding-pass__grid">
+              <div>
+                <dt>Traveler</dt>
+                <dd data-pass-traveler>traveler@example.com</dd>
+              </div>
+              <div>
+                <dt>Cabin</dt>
+                <dd data-pass-cabin>Explorer</dd>
+              </div>
+              <div>
+                <dt>Launch Window</dt>
+                <dd data-pass-window>July 2035</dd>
+              </div>
+              <div>
+                <dt>Seat Code</dt>
+                <dd data-pass-seat>MS-2035-A1</dd>
+              </div>
+            </dl>
+          </article>
         </div>
       </section>
     </main>
 
-    <script src="script.js?v=companion-controls"></script>
+    <script src="script.js?v=hotspots-pass-v6"></script>
   </body>
 </html>
