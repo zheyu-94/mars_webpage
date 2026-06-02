@@ -266,10 +266,10 @@ function initCabinSelection() {
     card.querySelector("button").addEventListener("click", () => {
       cards.forEach((item) => {
         item.classList.remove("is-active");
-        item.querySelector("button").textContent = "選擇";
+        item.querySelector("button").textContent = "Select";
       });
       card.classList.add("is-active");
-      card.querySelector("button").textContent = "已選擇";
+      card.querySelector("button").textContent = "Selected";
     });
   });
 }
@@ -281,7 +281,7 @@ function initBookingForm() {
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const email = new FormData(form).get("email");
-    note.textContent = `${email} 已加入發射名單。`;
+    note.textContent = `${email} has been added to the launch manifest.`;
     form.reset();
   });
 }
@@ -378,7 +378,7 @@ function initAlienCompanion() {
 
     function step(now) {
       const progress = clamp((now - startTime) / duration, 0, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased = progress;
       moveTo(startX + deltaX * eased, startY + deltaY * eased);
 
       if (progress < 1) {

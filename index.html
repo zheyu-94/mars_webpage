@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MARS 2035 | 下一站：火星</title>
+    <title>MARS 2035 | Next Destination: Mars</title>
     <meta
       name="description"
-      content="MARS 2035 是一個以次世代火星旅行為主題的沉浸式登陸頁。"
+      content="MARS 2035 is a fictional cinematic landing page for the next generation of Mars travel."
     >
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,40 +19,40 @@
   <body>
     <canvas id="particleCanvas" aria-hidden="true"></canvas>
 
-    <div class="alien-companion" data-alien-companion aria-label="可互動外星人夥伴">
+    <div class="alien-companion" data-alien-companion aria-label="Interactive alien companion">
       <img
         class="alien-companion__sprite"
         src="assets/alien.png"
-        alt="像素風外星人太空人"
+        alt="Pixel art alien astronaut"
         draggable="false"
       >
     </div>
 
-    <header class="site-header" aria-label="主要導覽">
-      <a class="brand" href="#hero" aria-label="MARS 2035 首頁">MARS 2035</a>
-      <nav class="nav-links" aria-label="頁面區塊">
-        <a href="#dashboard">數據</a>
-        <a href="#cabins">艙等</a>
-        <a href="#booking">預約</a>
+    <header class="site-header" aria-label="Primary">
+      <a class="brand" href="#hero" aria-label="MARS 2035 home">MARS 2035</a>
+      <nav class="nav-links" aria-label="Page sections">
+        <a href="#dashboard">Data</a>
+        <a href="#cabins">Cabins</a>
+        <a href="#booking">Book</a>
       </nav>
     </header>
 
     <main>
       <section class="hero" id="hero">
         <div class="hero__content reveal">
-          <p class="eyebrow">下一站：火星</p>
+          <p class="eyebrow">NEXT DESTINATION: MARS</p>
           <h1>MARS 2035</h1>
           <p class="hero__copy">
-            搭上精密規劃的星際航程，完成私人軌道轉乘，
-            在水手號峽谷迎接第一道火星日出。
+            Cross the interplanetary frontier with a precision-planned voyage,
+            private orbital transfer, and a first sunrise over Valles Marineris.
           </p>
-          <div class="hero__actions" aria-label="主視覺操作">
-            <a class="button button--primary" href="#booking">預約船票</a>
-            <a class="button button--ghost" href="#cabins">比較艙等</a>
+          <div class="hero__actions" aria-label="Hero actions">
+            <a class="button button--primary" href="#booking">Book Your Ticket</a>
+            <a class="button button--ghost" href="#cabins">Compare Cabins</a>
           </div>
         </div>
 
-        <div class="mars-stage reveal" aria-label="可互動火星預覽">
+        <div class="mars-stage reveal" aria-label="Interactive Mars preview">
           <canvas id="marsCanvas" width="720" height="720"></canvas>
           <div class="orbit orbit--one"></div>
           <div class="orbit orbit--two"></div>
@@ -61,69 +61,69 @@
 
       <section class="section dashboard" id="dashboard">
         <div class="section__intro reveal">
-          <p class="eyebrow">任務數據</p>
-          <h2>為新時代的星球通勤而設計。</h2>
+          <p class="eyebrow">MISSION DATA</p>
+          <h2>Designed for a new planetary commute.</h2>
         </div>
         <div class="metric-grid">
           <article class="metric-card reveal">
-            <span class="metric-card__label">表面重力</span>
+            <span class="metric-card__label">Surface Gravity</span>
             <strong><span data-counter="0.38" data-decimals="2">0</span>G</strong>
-            <p>低重力環境，支援更長時間的地表探索。</p>
+            <p>Lower impact exploration support for extended surface walks.</p>
           </article>
           <article class="metric-card reveal">
-            <span class="metric-card__label">航行距離</span>
-            <strong><span data-counter="5460">0</span> 百萬公里</strong>
-            <p>配合 2035 年軌道轉移窗口安排出發。</p>
+            <span class="metric-card__label">Distance Window</span>
+            <strong><span data-counter="5460">0</span>M km</strong>
+            <p>Departure aligned with the 2035 orbital transfer corridor.</p>
           </article>
           <article class="metric-card reveal">
-            <span class="metric-card__label">大氣 CO2</span>
+            <span class="metric-card__label">Atmosphere CO2</span>
             <strong><span data-counter="95">0</span>%</strong>
-            <p>太空衣與棲地系統針對稀薄大氣調校。</p>
+            <p>Suit systems tuned for thin-air excursions and sealed habitats.</p>
           </article>
           <article class="metric-card reveal">
-            <span class="metric-card__label">航行時間</span>
-            <strong><span data-counter="180">0</span> 天</strong>
-            <p>兼顧舒適度、燃料效率與抵達時機的航線。</p>
+            <span class="metric-card__label">Transit Duration</span>
+            <strong><span data-counter="180">0</span> days</strong>
+            <p>Balanced trajectory for comfort, fuel economy, and arrival timing.</p>
           </article>
         </div>
       </section>
 
       <section class="section cabins" id="cabins">
         <div class="section__intro reveal">
-          <p class="eyebrow">艙等選擇</p>
-          <h2>選擇你的深空航行方式。</h2>
+          <p class="eyebrow">CABIN SELECTION</p>
+          <h2>Choose the way you cross deep space.</h2>
         </div>
         <div class="cabin-grid" role="list">
           <article class="cabin-card reveal is-active" role="listitem">
-            <span class="cabin-card__tier">探索者</span>
-            <h3>觀景套艙</h3>
-            <p>全景視窗、自適應睡眠週期，以及任務導覽簡報。</p>
-            <button class="cabin-card__button" type="button">已選擇</button>
+            <span class="cabin-card__tier">Explorer</span>
+            <h3>Observation Suite</h3>
+            <p>Panoramic viewport, adaptive sleep cycle, and guided mission briefings.</p>
+            <button class="cabin-card__button" type="button">Selected</button>
           </article>
           <article class="cabin-card reveal" role="listitem">
-            <span class="cabin-card__tier">領航者</span>
-            <h3>指揮閣艙</h3>
-            <p>擴充工作區、航行模擬，以及私人通訊休息室。</p>
-            <button class="cabin-card__button" type="button">選擇</button>
+            <span class="cabin-card__tier">Navigator</span>
+            <h3>Command Loft</h3>
+            <p>Expanded workspace, navigation simulations, and private comms lounge.</p>
+            <button class="cabin-card__button" type="button">Select</button>
           </article>
           <article class="cabin-card reveal" role="listitem">
-            <span class="cabin-card__tier">先鋒者</span>
-            <h3>棲地艙房</h3>
-            <p>地表適應訓練、水耕餐飲，以及優先登陸資格。</p>
-            <button class="cabin-card__button" type="button">選擇</button>
+            <span class="cabin-card__tier">Pioneer</span>
+            <h3>Habitat Studio</h3>
+            <p>Surface-readiness training, hydroponic dining, and priority landing access.</p>
+            <button class="cabin-card__button" type="button">Select</button>
           </article>
         </div>
       </section>
 
       <section class="booking" id="booking">
         <div class="booking__inner reveal">
-          <p class="eyebrow">登船名單開放中</p>
-          <h2>保留你在 2035 發射名單上的席位。</h2>
+          <p class="eyebrow">BOARDING LIST OPEN</p>
+          <h2>Reserve your place on the 2035 launch manifest.</h2>
           <form class="booking-form">
-            <label for="email">電子郵件</label>
+            <label for="email">Email address</label>
             <div class="booking-form__row">
               <input id="email" name="email" type="email" placeholder="traveler@example.com" required>
-              <button class="button button--primary" type="submit">預約船票</button>
+              <button class="button button--primary" type="submit">Book Your Ticket</button>
             </div>
             <p class="form-note" aria-live="polite"></p>
           </form>
