@@ -46,17 +46,7 @@ const marsState = {
   lastY: 0,
   activeHotspot: null,
   hoveredHotspot: null,
-  craterMap: [
-    [-42, -14, 0.08],
-    [-24, 22, 0.13],
-    [4, -32, 0.1],
-    [26, 10, 0.16],
-    [45, -18, 0.07],
-    [58, 28, 0.11],
-    [-62, 34, 0.09],
-    [12, 44, 0.08],
-    [-8, 2, 0.18],
-  ],
+  craterMap: createEvenCraterMap(),
   hotspots: [
     {
       name: "Olympus Mons",
@@ -83,6 +73,25 @@ window.marsState = marsState;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const toRad = (degrees) => (degrees * Math.PI) / 180;
+
+function createEvenCraterMap() {
+  const sizes = [0.055, 0.07, 0.085, 0.105, 0.13, 0.075, 0.095, 0.06];
+  const count = 30;
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
+  return Array.from({ length: count }, (_, index) => {
+    const y = 1 - (index / (count - 1)) * 2;
+    const radius = Math.sqrt(1 - y * y);
+    const theta = index * goldenAngle;
+    const x = Math.cos(theta) * radius;
+    const z = Math.sin(theta) * radius;
+    const latitude = Math.asin(y) * (180 / Math.PI);
+    const longitude = Math.atan2(x, z) * (180 / Math.PI);
+    const scale = sizes[index % sizes.length];
+
+    return [latitude, longitude, scale];
+  });
+}
 
 const particleState = {
   width: 0,
